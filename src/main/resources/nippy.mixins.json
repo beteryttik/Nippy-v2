@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "minVersion": "0.8.5",
+  "package": "ru.nippy.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "MixinWorldRenderer",
+    "MixinFogRenderer",
+    "MixinGameRenderer"
+  ],
+  "injectors": {
+    "defaultRequire": 0
+  }
+}

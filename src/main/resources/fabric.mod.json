@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "nippy",
+  "version": "${version}",
+  "name": "Nippy Client",
+  "description": "Zimniy krasivyi client: vizualy, partikly, HUD i optimizacii. Sowmestim s Sodium.",
+  "authors": [
+    "Klyzz1x"
+  ],
+  "license": "MIT",
+  "icon": "assets/nippy/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "ru.nippy.NippyClient"
+    ]
+  },
+  "mixins": [
+    "nippy.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "fabric-api": "*",
+    "minecraft": "~1.21.11",
+    "java": ">=21"
+  }
+}
