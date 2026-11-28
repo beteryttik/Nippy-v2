@@ -1,8 +1,13 @@
 package ru.nippy.module;
 
 public class Setting {
-    private final String name;
-    private boolean value;
+    protected final String name;
+    protected Object value;
+
+    public Setting(String name) {
+        this.name = name;
+        this.value = null;
+    }
 
     public Setting(String name, boolean value) {
         this.name = name;
@@ -10,7 +15,8 @@ public class Setting {
     }
 
     public String getName() { return name; }
-    public boolean getValue() { return value; }
-    public void setValue(boolean value) { this.value = value; }
-    public void toggle() { value = !value; }
+
+    public Object getValue() { return value; }
+
+    public void setValue(Object value) { this.value = value; }
 }
