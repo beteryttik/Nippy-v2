@@ -12,6 +12,8 @@ import ru.nippy.gui.Theme;
 
 import java.util.ArrayList;
 import java.util.List;
+// было: import net.minecraft.client.input.Click;
+import net.minecraft.client.Click;
 
 public class QuickMenuScreen extends Screen {
     private final List<ModuleCard> cards = new ArrayList<>();
