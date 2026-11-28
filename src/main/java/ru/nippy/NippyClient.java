@@ -3,30 +3,36 @@ package ru.nippy;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.util.InputUtil;
+import net.minecraft.util.Identifier;
 import org.lwjgl.glfw.GLFW;
-import ru.nippy.gui.NippyGuiManager;
+import ru.nippy.gui.QuickMenuScreen;
 import ru.nippy.module.ModuleManager;
 
 public class NippyClient implements ClientModInitializer {
     public static final String MOD_ID = "nippy";
-    public static KeyBinding OPEN_MENU;
+    private static KeyBinding openMenu;
 
     @Override
     public void onInitializeClient() {
-        OPEN_MENU = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-                "key.nippy.open_menu", GLFW.GLFW_KEY_RIGHT_SHIFT, "key.categories.nippy"));
-
-        ModuleManager.init();
         NippyConfig.load();
-        ru.nippy.event.TickHandler.register();
+        ModuleManager.init();
+
+        openMenu = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+                "key.nippy.open_menu",
+                InputUtil.Type.KEYSYM,
+                GLFW.GLFW_KEY_RIGHT_SHIFT,
+                KeyBinding.Category.create(Identifier.of(MOD_ID, "main"))
+        ));
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            while (OPEN_MENU.wasPressed()) {
-                NippyGuiManager.toggleQuickMenu();
+            while (openMenu.wasPressed()) {
+                if (client.currentScreen == null) {
+                    client.setScreen(new QuickMenuScreen());
+                }
             }
         });
-
-        Nippy.LOGGER.info("[Nippy] Client initialized. {} modules loaded.", ModuleManager.getModules().size());
     }
 }
