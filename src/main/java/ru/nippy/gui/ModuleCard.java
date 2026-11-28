@@ -1,69 +1,63 @@
 package ru.nippy.gui;
 
+import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import ru.nippy.module.Module;
 import ru.nippy.module.Setting;
 
-/**
- * Kartochka modulya dlya polnogo menu (v duhe ReallyVisuals):
- * nazvanie, opisanie, status, fioletovyi toggle, rashryatie nastroek.
- */
 public class ModuleCard {
-    private static final int PADDING = 12;
-    private static final int CORNER = 8;
+    private static final int PADDING = 8;
+    private static final int HEIGHT = 26;
 
     private final Module module;
     private boolean expanded;
-    private int x, y, width, height;
+    private int lastHeight = HEIGHT;
 
-    public ModuleCard(Module module) { this.module = module; }
-
-    public void setBounds(int x, int y, int w, int h) { this.x = x; this.y = y; this.width = w; this.height = h; }
-    public Module getModule() { return module; }
-
-    public void render(DrawContext ctx, int mouseX, int mouseY) {
-        boolean hovered = mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + height;
-        ctx.fill(x, y, x + width, y + height, hovered ? Theme.BG_SOFT : Theme.BG);
-        ctx.drawBorder(x, y, width, height, module.isEnabled() ? Theme.ACCENT : Theme.BORDER);
-
-        ctx.drawString(ctx.getTextRenderer(), module.getName(), x + PADDING, y + PADDING, Theme.TEXT, true);
-        ctx.drawString(ctx.getTextRenderer(), module.getDescription(), x + PADDING, y + PADDING + 12, Theme.SUBTEXT, true);
-
-        // toggle
-        int tx = x + width - PADDING - 34;
-        ctx.fill(tx, y + PADDING, tx + 30, y + PADDING + 14, 0xFF33334A);
-        int knob = module.isEnabled() ? tx + 18 : tx + 2;
-        ctx.fill(knob, y + PADDING + 2, knob + 10, y + PADDING + 12,
-                module.isEnabled() ? Theme.ACCENT : Theme.SUBTEXT);
-
-        // status
-        String st = module.isEnabled() ? "ENABLED" : "DISABLED";
-        int sc = module.isEnabled() ? Theme.ENABLED : Theme.DISABLED;
-        ctx.drawString(ctx.getTextRenderer(), st, tx - ctx.getTextRenderer().getWidth(st) - 8, y + PADDING, sc, true);
-
-        // arrow
-        if (!module.getSettings().isEmpty()) {
-            ctx.drawString(ctx.getTextRenderer(), expanded ? "v" : ">", x + width - PADDING - 8, y + height - 16, Theme.SUBTEXT, true);
-        }
-
-        if (expanded) {
-            int sy = y + height;
-            ctx.fill(x, sy, x + width, sy + module.getSettings().size() * 18 + 8, Theme.BG_SOFT);
-            int i = 0;
-            for (Setting s : module.getSettings()) {
-                ctx.drawString(ctx.getTextRenderer(), s.getName(), x + PADDING, sy + 4 + i * 18, Theme.TEXT, true);
-                i++;
-            }
-        }
+    public ModuleCard(Module module) {
+        this.module = module;
     }
 
-    public boolean onClick(double mx, double my) {
-        if (mx < x || mx > x + width || my < y || my > y + height) return false;
-        int tx = x + width - PADDING - 34;
-        if (my >= y && my <= y + 30) {
-            if (mx >= tx && mx <= tx + 30) { module.toggle(); return true; }
+    public Module getModule() { return module; }
+    public int getLastHeight() { return lastHeight; }
+
+    public int render(DrawContext ctx, TextRenderer font, int x, int y, int width) {
+        ctx.fill(x, y, x + width, y + HEIGHT, Theme.PANEL);
+        ctx.drawStrokedRectangle(x, y, width, HEIGHT,
+                module.isEnabled() ? Theme.ACCENT : Theme.BORDER);
+
+        ctx.drawText(font, module.getName(), x + PADDING, y + PADDING, Theme.TEXT, true);
+
+        String st = module.isEnabled() ? "ON" : "OFF";
+        ctx.drawText(font, st, x + width - PADDING - font.getWidth(st), y + PADDING,
+                module.isEnabled() ? Theme.ON : Theme.OFF, true);
+        ctx.drawText(font, expanded ? "v" : ">", x + width - PADDING - 8, y + PADDING,
+                Theme.SUBTEXT, true);
+
+        int total = HEIGHT;
+        if (expanded) {
+            ctx.drawText(font, module.getDescription(), x + PADDING, y + HEIGHT, Theme.SUBTEXT, true);
+            int sy = y + HEIGHT + 12;
+            for (Setting s : module.getSettings()) {
+                ctx.drawText(font, (s.getValue() ? "[x] " : "[ ] ") + s.getName(),
+                        x + PADDING, sy, Theme.TEXT, true);
+                sy += 12;
+            }
+            total = HEIGHT + 14 + module.getSettings().size() * 12;
         }
-        if (!module.getSettings().isEmpty() && my >= y + height - 24) { expanded = !expanded; return true; }
-        return false;
+        lastHeight = total;
+        return total;
+    }
+
+    /** true, если клик попал в карточку и был обработан */
+    public boolean mouseClicked(double mouseX, double mouseY, int x, int y, int width) {
+        if (mouseX < x || mouseX > x + width) return false;
+        if (mouseY < y || mouseY > y + lastHeight) return false;
+
+        if (mouseX > x + width - 24) {
+            expanded = !expanded;
+        } else {
+            module.toggle();
+        }
+        return true;
     }
 }
