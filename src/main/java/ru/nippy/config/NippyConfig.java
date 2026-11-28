@@ -1,46 +1,49 @@
-package ru.nippy.config;
+package ru.nippy;
+
+import net.fabricmc.loader.api.FabricLoader;
+import ru.nippy.module.Module;
+import ru.nippy.module.ModuleManager;
 
 import java.io.IOException;
-import java.nio.file.*;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Properties;
 
-public class NippyConfig {
-    private static final Path FILE = Path.of("config", "nippy.properties");
-    private static final Properties PROPS = new Properties();
+public final class NippyConfig {
+    private static final Path FILE =
+            FabricLoader.getInstance().getConfigDir().resolve("nippy.properties");
 
-    public static boolean disableRain = true;
-    public static boolean staticWater = false;
-    public static boolean disableOverlays = false;
-    public static boolean quickMenuEnabled = true;
-    public static int accentColor = 0xFFA666FF;
+    private NippyConfig() {}
 
     public static void load() {
-        if (Files.exists(FILE)) {
-            try {
-                PROPS.load(Files.newInputStream(FILE));
-                disableRain = Boolean.parseBoolean(PROPS.getProperty("disableRain", "true"));
-                staticWater = Boolean.parseBoolean(PROPS.getProperty("staticWater", "false"));
-                disableOverlays = Boolean.parseBoolean(PROPS.getProperty("disableOverlays", "false"));
-                quickMenuEnabled = Boolean.parseBoolean(PROPS.getProperty("quickMenuEnabled", "true"));
-                accentColor = (int) Long.parseLong(PROPS.getProperty("accentColor", "FFA666FF"), 16);
-            } catch (IOException e) {
-                ru.nippy.Nippy.LOGGER.warn("[Nippy] Failed to load config", e);
+        if (!Files.exists(FILE)) { save(); return; }
+        try (InputStream in = Files.newInputStream(FILE)) {
+            Properties props = new Properties();
+            props.load(in);
+            for (Module m : ModuleManager.getModules()) {
+                String v = props.getProperty("module." + m.getName() + ".enabled");
+                if (v != null) m.setEnabled(Boolean.parseBoolean(v));
             }
+        } catch (IOException e) {
+            System.err.println("[Nippy] config read failed: " + e.getMessage());
         }
-        save();
     }
 
     public static void save() {
-        PROPS.setProperty("disableRain", String.valueOf(disableRain));
-        PROPS.setProperty("staticWater", String.valueOf(staticWater));
-        PROPS.setProperty("disableOverlays", String.valueOf(disableOverlays));
-        PROPS.setProperty("quickMenuEnabled", String.valueOf(quickMenuEnabled));
-        PROPS.setProperty("accentColor", String.format("%08X", accentColor));
         try {
             Files.createDirectories(FILE.getParent());
-            PROPS.store(Files.newOutputStream(FILE), "Nippy Client config");
+            Properties props = new Properties();
+            for (Module m : ModuleManager.getModules()) {
+                props.setProperty("module." + m.getName() + ".enabled",
+                        Boolean.toString(m.isEnabled()));
+            }
+            try (OutputStream out = Files.newOutputStream(FILE)) {
+                props.store(out, "Nippy Client config");
+            }
         } catch (IOException e) {
-            ru.nippy.Nippy.LOGGER.warn("[Nippy] Failed to save config", e);
+            System.err.println("[Nippy] config save failed: " + e.getMessage());
         }
     }
 }
