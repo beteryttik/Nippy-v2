@@ -1,23 +1,13 @@
 package ru.nippy.gui;
 
 public final class Theme {
+    public static final int ACCENT = 0xFF7C4DFF;
+    public static final int BORDER = 0xFF3A3A55;
+    public static final int PANEL = 0xF0161620;
+    public static final int TEXT = 0xFFE8E8F0;
+    public static final int SUBTEXT = 0xFF9A9AB0;
+    public static final int ON = 0xFF4CAF50;
+    public static final int OFF = 0xFFB06060;
+
     private Theme() {}
-
-    public static int ACCENT = 0xFFA666FF;      // fioletovyi akcent
-    public static int ACCENT_DIM = 0xFF7A4CC9;
-    public static int BG = 0xEE242436;           // temno-seryi panel
-    public static int BG_SOFT = 0xEE1F1F2B;
-    public static int TEXT = 0xFFF5F5FA;
-    public static int SUBTEXT = 0xFFA0A0B8;
-    public static int BORDER = 0x40FFFFFF;       // "inoi" obvodka
-    public static int ENABLED = 0xFF81C784;
-    public static int DISABLED = 0xFFE57373;
-
-    public static void applyPreset(String preset) {
-        switch (preset) {
-            case "Night" -> ACCENT = 0xFF6C8CFF;
-            case "Neon" -> ACCENT = 0xFFCE1DFF;
-            default -> ACCENT = 0xFFA666FF; // Frost Purple
-        }
-    }
 }
