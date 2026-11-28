@@ -1,8 +1,9 @@
-package ru.nippy;
+package ru.nippy.config;
 
 import net.fabricmc.loader.api.FabricLoader;
 import ru.nippy.module.Module;
 import ru.nippy.module.ModuleManager;
+import ru.nippy.modules.performance.CleanRain;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,6 +16,9 @@ public final class NippyConfig {
     private static final Path FILE =
             FabricLoader.getInstance().getConfigDir().resolve("nippy.properties");
 
+    /** Флаг для миксина MixinWorldRenderer (отключение дождя). */
+    public static boolean disableRain = false;
+
     private NippyConfig() {}
 
     public static void load() {
@@ -26,6 +30,8 @@ public final class NippyConfig {
                 String v = props.getProperty("module." + m.getName() + ".enabled");
                 if (v != null) m.setEnabled(Boolean.parseBoolean(v));
             }
+            // синхронизируем флаг с состоянием модуля CleanRain
+            disableRain = ModuleManager.isEnabled(CleanRain.class);
         } catch (IOException e) {
             System.err.println("[Nippy] config read failed: " + e.getMessage());
         }
