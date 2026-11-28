@@ -2,19 +2,22 @@ package ru.nippy.module;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class ModuleManager {
-    private static final List<Module> MODULES = new ArrayList<>();
+    private static final List<Module> modules = new ArrayList<>();
 
     public static void init() {
-        ru.nippy.modules.Registry.registerAll(MODULES);
+        modules.add(new ZoomModule());
+        modules.add(new NoFogModule());
+        modules.add(new HudModule());
     }
 
-    public static void register(Module m) { MODULES.add(m); }
-    public static List<Module> getModules() { return MODULES; }
+    public static List<Module> getModules() { return modules; }
 
-    public static List<Module> byCategory(Category c) {
-        return MODULES.stream().filter(m -> m.getCategory() == c).collect(Collectors.toList());
+    public static boolean isEnabled(Class<? extends Module> type) {
+        for (Module m : modules) {
+            if (type.isInstance(m)) return m.isEnabled();
+        }
+        return false;
     }
 }
