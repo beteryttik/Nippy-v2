@@ -10,6 +10,8 @@ import net.minecraft.util.Identifier;
 import org.lwjgl.glfw.GLFW;
 import ru.nippy.gui.QuickMenuScreen;
 import ru.nippy.module.ModuleManager;
+// было: (без импорта — класс лежал в том же пакете)
+import ru.nippy.config.NippyConfig;  // теперь он здесь
 
 public class NippyClient implements ClientModInitializer {
     public static final String MOD_ID = "nippy";
