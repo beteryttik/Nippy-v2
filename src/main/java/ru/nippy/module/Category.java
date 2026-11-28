@@ -6,7 +6,9 @@ public enum Category {
     PERFORMANCE("Performance"),
     UTILS("Utils"),
     PARTICLE("Particles"),
-    QOL("QoL");
+    QOL("QoL"),
+    CLIENT("Client"),      // <-- Добавлено для модулей из папки client/
+    WORLD("World");        // <-- Добавлено для модулей из папки world/
 
     private final String displayName;
 
