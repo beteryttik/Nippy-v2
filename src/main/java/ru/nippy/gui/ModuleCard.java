@@ -2,8 +2,11 @@ package ru.nippy.gui;
 
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
+import ru.nippy.module.BooleanSetting;
 import ru.nippy.module.Module;
+import ru.nippy.module.ModeSetting;
 import ru.nippy.module.Setting;
+import ru.nippy.module.SliderSetting;
 
 public class ModuleCard {
     private static final int PADDING = 8;
@@ -38,8 +41,7 @@ public class ModuleCard {
             ctx.drawText(font, module.getDescription(), x + PADDING, y + HEIGHT, Theme.SUBTEXT, true);
             int sy = y + HEIGHT + 12;
             for (Setting s : module.getSettings()) {
-                ctx.drawText(font, (s.getValue() ? "[x] " : "[ ] ") + s.getName(),
-                        x + PADDING, sy, Theme.TEXT, true);
+                ctx.drawText(font, settingLabel(s), x + PADDING, sy, Theme.TEXT, true);
                 sy += 12;
             }
             total = HEIGHT + 14 + module.getSettings().size() * 12;
@@ -48,15 +50,40 @@ public class ModuleCard {
         return total;
     }
 
-    /** true, если клик попал в карточку и был обработан */
+    private String settingLabel(Setting s) {
+        if (s instanceof BooleanSetting b) {
+            return (b.get() ? "[x] " : "[ ] ") + s.getName();
+        }
+        if (s instanceof SliderSetting sl) {
+            return s.getName() + ": " + sl.getInt();
+        }
+        if (s instanceof ModeSetting ms) {
+            return s.getName() + ": " + ms.getSelected();
+        }
+        return s.getName();
+    }
+
     public boolean mouseClicked(double mouseX, double mouseY, int x, int y, int width) {
         if (mouseX < x || mouseX > x + width) return false;
         if (mouseY < y || mouseY > y + lastHeight) return false;
 
-        if (mouseX > x + width - 24) {
-            expanded = !expanded;
-        } else {
-            module.toggle();
+        if (mouseY <= y + HEIGHT) {
+            // клик по шапке: правая часть — стрелка раскрытия, остальное — вкл/выкл
+            if (mouseX > x + width - 24) {
+                expanded = !expanded;
+            } else {
+                module.toggle();
+            }
+            return true;
+        }
+
+        // клик по настройкам
+        int idx = (int) ((mouseY - (y + HEIGHT + 12)) / 12);
+        if (idx >= 0 && idx < module.getSettings().size()) {
+            Setting s = module.getSettings().get(idx);
+            if (s instanceof BooleanSetting b) b.toggle();
+            if (s instanceof ModeSetting m) m.cycle();
+            return true;
         }
         return true;
     }
